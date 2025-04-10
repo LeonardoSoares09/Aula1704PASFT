@@ -5,8 +5,6 @@ import lombok.*;
 @ToString
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode
 public class Livro {
     
@@ -14,5 +12,12 @@ public class Livro {
     private String titulo;
     private String autor;
     private int ano;
+
+    public Livro(int ind, String titulo, String autor, int ano){
+        this.id = id;
+        this.titulo = titulo;
+        this.autor = autor;
+        this.ano = ano;
+    }
 
 }
