@@ -1,73 +1,69 @@
 package br.pucrs.leonardosoaresdasilva.exemplo;
 
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import java.util.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 @RestController
 @RequestMapping("/biblioteca")
-
 public class ExemploController {
+    private Acervo acervo;
 
-private List<Livro> livros;
- 
-@GetMapping("/")
- public String getMensagemInicial() {
- return "Aplicacao Spring-Boot funcionando!";
- }
+    @Autowired
+    public ExemploController(Acervo acervo) {
+        this.acervo = acervo;        
+    }
 
- public ExemploController(){
-    this.livros = new ArrayList<>();
-    adicionarLivros();
+    @GetMapping("/")
+    public String getMensagemInicial() {
+        return "Aplicacao Spring-Boot funcionando!";
+    }
+
+    @GetMapping("/livros")
+    public List<Livro> getLivros() {
+        return acervo.getLivros();
+    }
     
- }
+    @GetMapping("/titulos")
+    public List<String> getTitulos() {
+        return acervo.getTitulos();
+    }
 
- private void adicionarLivros(){
-   livros.add( new Livro(1,"O senhor dos aneis", "J.R.R. Tolkien", 1954));
-   livros.add( new Livro(1,"Romeu e Julieta", "Luciano", 1999));
-   livros.add( new Livro(1,"Harry Potter", "Joao", 2004));
-   livros.add( new Livro(1,"Diario de um banana", "Leonardo", 2021));
- }
+    @GetMapping("/autores")
+    public List<String> getListaAutores() {
+        return acervo.getListaAutores();
+    }
 
- @GetMapping("/livros")
- public List<Livro> getLivros() {
-     return livros;
- }
- 
- @GetMapping("/titulos")
- public List<String> getTitulos() {
-     return livros.stream()
-            .map(livro->livro.getTitulo())
-            .toList();
- }
+    @GetMapping("/livrosautor")
+    public List<Livro> getLivrosDoAutor(@RequestParam(value = "autor") String autor) {
+        return acervo.getLivrosDoAutor(autor);
+    }
 
- @GetMapping("/autores")
- public List<String> getListaAutores() {
-     return livros.stream()
-             .map(l -> l.getAutor())
-             .distinct()
-             .toList();
- }
+    @GetMapping("/livrosautorano/{autor}/ano/{ano}")
+    public List<Livro> getLivrosDoAutor(@PathVariable(value="autor") String autor,
+                                        @PathVariable(value="ano")int ano) {
+        return acervo.getLivrosDoAutor(autor, ano);
+    }
+    
+    @PostMapping("/novolivro")
+    public boolean cadastraLivroNovo(@RequestBody final Livro livro) {
+        return acervo.cadastraLivroNovo(livro);
+    }
 
- @GetMapping("/livrosautor")
- public List<Livro> getLivrosAutor(@RequestParam String autor){
-    return livros.stream()
-          .filter(l -> l.getAutor().equalsIgnoreCase(autor))
-          .collect(Collectors.toList());
- }
+    @GetMapping("/livrotitulo/{titulo}")
+    public ResponseEntity<Livro> getLivroTitulo(@PathVariable("titulo") String titulo) {
+        Livro livro = acervo.getLivroTitulo(titulo);
+        return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(livro);
+        }
 
- @GetMapping("/livrosautorano/{autor}/ano/{ano}")
- public List<Livro> getLivrosPorAutorEAnos(@PathVariable String autor, @PathVariable int ano) {
-    return livros.stream()
-                 .filter(l -> l.getAutor().equalsIgnoreCase(autor) && l.getAno() == ano)
-                 .collect(Collectors.toList());
-}
+    @PostMapping("/alteralivro")
+    public boolean alterarLivro(@RequestBody Livro livro){
+      return acervo.alteraLivroPorId(livro);
+    }
+
+
 }
